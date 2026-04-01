@@ -1,0 +1,697 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+
+<book lang="ru">
+
+  <bookinfo>
+    <title>Табличный процессор (аналог Microsoft Excel)</title>
+    <subtitle>Справочное руководство программиста</subtitle>
+    <abstract>
+      <para>Данное руководство описывает программный интерфейс (API)
+      табличного процессора, разработанного в рамках учебного проекта.
+      Приложение позволяет пользователям создавать и редактировать
+      электронные таблицы, выполнять вычисления по формулам, строить
+      диаграммы и проводить анализ данных.</para>
+    </abstract>
+  </bookinfo>
+
+  <!-- ============================================================ -->
+  <!--  Глава 1: Обзор проекта                                      -->
+  <!-- ============================================================ -->
+
+  <chapter id="overview">
+    <title>Обзор проекта</title>
+
+    <para>Табличный процессор — это консольное приложение на языке Python,
+    предназначенное для работы с электронными таблицами. Система предоставляет
+    пользователю полноценный инструментарий для ввода, хранения, обработки и
+    визуализации числовых и текстовых данных в табличной форме.</para>
+
+    <para>Приложение реализует все ключевые возможности современных табличных
+    процессоров: вычисление формул с поддержкой стандартных функций, условное
+    форматирование, построение диаграмм, сортировку и фильтрацию данных,
+    сводные таблицы и статистический анализ.</para>
+
+    <para>Архитектура приложения построена по принципу единственной
+    ответственности: каждый модуль выполняет строго определённую задачу и
+    взаимодействует с другими через чётко определённые интерфейсы. Такой
+    подход обеспечивает высокую степень повторного использования кода и
+    упрощает сопровождение проекта.</para>
+
+    <para>Приложение состоит из четырнадцати независимых модулей, охватывающих
+    все аспекты функциональности: от пользовательского интерфейса и управления
+    файлами до инструментов совместной работы и статистического анализа данных.
+    Модульная структура позволяет расширять функциональность без изменения
+    существующего кода.</para>
+
+    <para>Для работы приложения требуется Python версии 3.8 и выше. Внешние
+    зависимости минимальны, что упрощает развёртывание на любой платформе.
+    Проект размещён в открытом репозитории GitHub по адресу
+    https://github.com/zakizane37/excel-spreadsheet-app и распространяется
+    под лицензией MIT.</para>
+
+    <para>Основные возможности приложения:</para>
+    <itemizedlist>
+      <listitem>
+        <para>Ввод, редактирование и форматирование данных в ячейках</para>
+      </listitem>
+      <listitem>
+        <para>Вычисление формул и стандартных функций (SUM, AVERAGE, MAX, MIN)</para>
+      </listitem>
+      <listitem>
+        <para>Построение диаграмм: гистограммы, линейные, круговые, точечные</para>
+      </listitem>
+      <listitem>
+        <para>Сортировка и фильтрация данных по условиям</para>
+      </listitem>
+      <listitem>
+        <para>Сводные таблицы с функциями агрегации</para>
+      </listitem>
+      <listitem>
+        <para>Проверка данных и правила ввода</para>
+      </listitem>
+      <listitem>
+        <para>Макросы и автоматизация повторяющихся действий</para>
+      </listitem>
+      <listitem>
+        <para>Совместная работа нескольких пользователей</para>
+      </listitem>
+      <listitem>
+        <para>Экспорт в форматы PDF и CSV</para>
+      </listitem>
+      <listitem>
+        <para>Статистический анализ и анализ «что если»</para>
+      </listitem>
+    </itemizedlist>
+  </chapter>
+
+  <!-- ============================================================ -->
+  <!--  Глава 2: Сценарии использования                             -->
+  <!-- ============================================================ -->
+
+  <chapter id="use-cases">
+    <title>Сценарии использования</title>
+
+    <!-- Сценарий 1 -->
+    <section id="use-case-1">
+      <title>Сценарий 1: Создание таблицы с формулами и диаграммой</title>
+      <para>Пользователь создаёт новый документ, вводит данные о продажах
+      по месяцам, вычисляет итоговые суммы с помощью формул и строит
+      диаграмму для визуального представления результатов.</para>
+
+      <programlisting language="python">
+from cell_manager import CellManager
+from formula_engine import FormulaEngine
+from chart_module import ChartModule
+from file_manager import FileManager
+
+# Создаём новый документ
+fm = FileManager()
+fm.create_new()
+
+# Вводим данные о продажах
+cells = CellManager()
+cells.set_value("A1", "Январь")
+cells.set_value("B1", 150000)
+cells.set_value("A2", "Февраль")
+cells.set_value("B2", 175000)
+cells.set_value("A3", "Март")
+cells.set_value("B3", 210000)
+
+# Вычисляем сумму за квартал
+engine = FormulaEngine()
+engine.set_cell_value("B1", 150000)
+engine.set_cell_value("B2", 175000)
+engine.set_cell_value("B3", 210000)
+total = engine.calculate_sum([150000, 175000, 210000])
+cells.set_value("B4", total)
+print(f"Итого за квартал: {total}")  # Итого за квартал: 535000
+
+# Строим диаграмму продаж
+chart = ChartModule()
+chart.create_chart("bar", [150000, 175000, 210000], "Продажи за I квартал")
+
+# Сохраняем файл
+fm.save_file("sales_q1.xlsx")
+      </programlisting>
+    </section>
+
+    <!-- Сценарий 2 -->
+    <section id="use-case-2">
+      <title>Сценарий 2: Фильтрация данных и создание сводной таблицы</title>
+      <para>Аналитик загружает массив данных о транзакциях, применяет
+      фильтры для отбора нужных записей и строит сводную таблицу для
+      анализа итогов по категориям.</para>
+
+      <programlisting language="python">
+from sort_filter import SortFilter
+from pivot_table import PivotTable
+from statistics_module import StatisticsModule
+
+# Исходные данные: [категория, сумма, месяц]
+data = [
+    ["Электроника", 45000, "Январь"],
+    ["Одежда", 12000, "Январь"],
+    ["Электроника", 51000, "Февраль"],
+    ["Продукты", 8500, "Февраль"],
+    ["Одежда", 15000, "Март"],
+]
+
+# Сортируем по сумме (убывание)
+sf = SortFilter()
+sorted_data = sf.sort_by_column(data, column=1, ascending=False)
+print("Топ продаж:")
+for row in sorted_data:
+    print(f"  {row[0]}: {row[1]} руб.")
+
+# Применяем фильтр: только суммы выше 10000
+sf.apply_filter(column=1, condition=">", value=10000)
+
+# Строим сводную таблицу по категориям
+pivot = PivotTable(source_data=data)
+pivot.set_row_fields(["категория"])
+pivot.set_value_field("сумма", aggregation="sum")
+
+# Статистика по суммам
+stats = StatisticsModule()
+stats.load_data([45000, 12000, 51000, 8500, 15000])
+result = stats.get_descriptive_stats()
+print(f"Среднее: {result['mean']}, Максимум: {result['max']}")
+      </programlisting>
+    </section>
+
+    <!-- Сценарий 3 -->
+    <section id="use-case-3">
+      <title>Сценарий 3: Автоматизация с помощью макросов и экспорт в PDF</title>
+      <para>Пользователь записывает макрос для автоматического форматирования
+      заголовков таблицы, затем запускает его одной командой и экспортирует
+      готовый отчёт в PDF.</para>
+
+      <programlisting language="python">
+from macro_module import MacroModule
+from formatter import Formatter
+from print_export import PrintExport
+from data_validation import DataValidation
+
+# Создаём правила форматирования
+fmt = Formatter()
+fmt.set_font("A1", font_name="Arial", size=14, bold=True)
+fmt.set_background_color("A1", "#4472C4")
+fmt.set_number_format("B1", "currency")
+
+# Добавляем правило условного форматирования
+fmt.add_conditional_rule(
+    cell_range="B1:B100",
+    condition=">100000",
+    fmt={"background": "#A9D18E"}
+)
+
+# Записываем макрос для повторного форматирования
+macro = MacroModule()
+macro.record_macro("FormatHeaders", [
+    "set_font A1 Arial 14 bold",
+    "set_background A1 #4472C4",
+    "set_number_format B1 currency"
+])
+macro.assign_hotkey("Ctrl+Shift+F", "FormatHeaders")
+
+# Добавляем проверку данных для столбца B
+validation = DataValidation()
+validation.add_number_rule("B1:B100", min_val=0, max_val=10000000)
+
+# Экспортируем отчёт в PDF
+pe = PrintExport()
+pe.set_orientation("landscape")
+pe.export_to_pdf("quarterly_report.pdf")
+      </programlisting>
+    </section>
+
+  </chapter>
+
+  <!-- ============================================================ -->
+  <!--  Глава 3: API Reference                                      -->
+  <!-- ============================================================ -->
+
+  <chapter id="api-reference">
+    <title>Справочник API</title>
+
+    <!-- FormulaEngine -->
+    <section id="api-formula">
+      <title>Модуль FormulaEngine (formula_engine.py)</title>
+      <para>Осуществляет разбор и вычисление формул, управление значениями ячеек.</para>
+
+      <section id="api-formula-sum">
+        <title>Метод calculate_sum(values)</title>
+        <para>Вычисляет сумму списка числовых значений.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>values</emphasis> (list) — список числовых значений</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>float — сумма значений</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+
+      <section id="api-formula-avg">
+        <title>Метод calculate_average(values)</title>
+        <para>Вычисляет среднее арифметическое списка значений.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>values</emphasis> (list) — список числовых значений</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>float — среднее арифметическое</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если список пуст</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+
+      <section id="api-formula-cell">
+        <title>Метод set_cell_value(address, value)</title>
+        <para>Устанавливает значение ячейки по её адресу.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>address</emphasis> (str) — адрес ячейки (например, 'A1')</para>
+              <para><emphasis>value</emphasis> — значение для записи</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- ChartModule -->
+    <section id="api-chart">
+      <title>Модуль ChartModule (chart_module.py)</title>
+      <para>Управляет созданием и настройкой диаграмм и графиков.</para>
+
+      <section id="api-chart-create">
+        <title>Метод create_chart(chart_type, data, title)</title>
+        <para>Создаёт диаграмму указанного типа на основе переданных данных.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>chart_type</emphasis> (str) — тип диаграммы: 'bar', 'line', 'pie', 'scatter'</para>
+              <para><emphasis>data</emphasis> (list) — данные для построения</para>
+              <para><emphasis>title</emphasis> (str) — заголовок диаграммы</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>dict — параметры созданной диаграммы</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если указан неподдерживаемый тип диаграммы</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- MacroModule -->
+    <section id="api-macro">
+      <title>Модуль MacroModule (macro_module.py)</title>
+      <para>Обеспечивает запись, хранение и воспроизведение макросов.</para>
+
+      <section id="api-macro-record">
+        <title>Метод record_macro(name, actions)</title>
+        <para>Записывает макрос с заданным именем и набором действий.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>name</emphasis> (str) — уникальное имя макроса</para>
+              <para><emphasis>actions</emphasis> (list) — список действий макроса</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если список действий пуст</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+
+      <section id="api-macro-run">
+        <title>Метод run_macro(name)</title>
+        <para>Запускает ранее записанный макрос по имени.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>name</emphasis> (str) — имя макроса для запуска</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>KeyError — если макрос с указанным именем не найден</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- FileManager -->
+    <section id="api-file">
+      <title>Модуль FileManager (file_manager.py)</title>
+      <para>Управляет файловыми операциями: создание, открытие, сохранение документов.</para>
+
+      <section id="api-file-open">
+        <title>Метод open_file(filepath)</title>
+        <para>Открывает существующий файл электронной таблицы.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>filepath</emphasis> (str) — полный путь к файлу</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>bool — True если файл успешно открыт</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если формат файла не поддерживается</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+
+      <section id="api-file-save">
+        <title>Метод save_file(filepath)</title>
+        <para>Сохраняет текущий документ по указанному пути.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>filepath</emphasis> (str, optional) — путь для сохранения</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>bool — True если файл успешно сохранён</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если путь не указан и документ не сохранялся ранее</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- CellManager -->
+    <section id="api-cell">
+      <title>Модуль CellManager (cell_manager.py)</title>
+      <para>Управляет данными ячеек и операциями над диапазонами.</para>
+
+      <section id="api-cell-set">
+        <title>Метод set_value(address, value)</title>
+        <para>Устанавливает значение ячейки по адресу.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>address</emphasis> (str) — адрес ячейки, например 'A1'</para>
+              <para><emphasis>value</emphasis> — значение для записи</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+
+      <section id="api-cell-merge">
+        <title>Метод merge_cells(start, end)</title>
+        <para>Объединяет диапазон ячеек в одну.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>start</emphasis> (str) — адрес верхней левой ячейки</para>
+              <para><emphasis>end</emphasis> (str) — адрес нижней правой ячейки</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если диапазон уже объединён</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- Formatter -->
+    <section id="api-formatter">
+      <title>Модуль Formatter (formatter.py)</title>
+      <para>Управляет форматированием ячеек и условным форматированием.</para>
+
+      <section id="api-formatter-bgcolor">
+        <title>Метод set_background_color(address, color)</title>
+        <para>Устанавливает цвет фона ячейки в формате HEX.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>address</emphasis> (str) — адрес ячейки</para>
+              <para><emphasis>color</emphasis> (str) — цвет в формате HEX, например '#FFFF00'</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если строка не соответствует формату HEX</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- SortFilter -->
+    <section id="api-sort">
+      <title>Модуль SortFilter (sort_filter.py)</title>
+      <para>Реализует сортировку и фильтрацию табличных данных.</para>
+
+      <section id="api-sort-column">
+        <title>Метод sort_by_column(data, column, ascending)</title>
+        <para>Сортирует данные по указанному столбцу.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>data</emphasis> (list) — список строк таблицы</para>
+              <para><emphasis>column</emphasis> (int) — индекс столбца</para>
+              <para><emphasis>ascending</emphasis> (bool) — True для сортировки по возрастанию</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>list — отсортированный список строк</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- SheetManager -->
+    <section id="api-sheet">
+      <title>Модуль SheetManager (sheet_manager.py)</title>
+      <para>Управляет листами электронной таблицы.</para>
+
+      <section id="api-sheet-add">
+        <title>Метод add_sheet(name)</title>
+        <para>Добавляет новый лист с указанным именем.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>name</emphasis> (str) — имя нового листа</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>bool — True если лист успешно создан</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если лист с таким именем уже существует</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- PivotTable -->
+    <section id="api-pivot">
+      <title>Модуль PivotTable (other_modules.py)</title>
+      <para>Обеспечивает построение и настройку сводных таблиц.</para>
+
+      <section id="api-pivot-value">
+        <title>Метод set_value_field(field, aggregation)</title>
+        <para>Устанавливает поле значений и функцию агрегации.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>field</emphasis> (str) — название поля</para>
+              <para><emphasis>aggregation</emphasis> (str) — функция: 'sum', 'avg' или 'count'</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если указана неподдерживаемая функция</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- DataValidation -->
+    <section id="api-validation">
+      <title>Модуль DataValidation (other_modules.py)</title>
+      <para>Управляет правилами проверки вводимых данных.</para>
+
+      <section id="api-validation-validate">
+        <title>Метод validate(address, value)</title>
+        <para>Проверяет соответствие значения правилу для ячейки.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>address</emphasis> (str) — адрес ячейки</para>
+              <para><emphasis>value</emphasis> — проверяемое значение</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>bool — True если значение соответствует правилу</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- PrintExport -->
+    <section id="api-print">
+      <title>Модуль PrintExport (other_modules.py)</title>
+      <para>Управляет параметрами печати и экспортом документов.</para>
+
+      <section id="api-print-pdf">
+        <title>Метод export_to_pdf(filepath)</title>
+        <para>Экспортирует текущий документ в формат PDF.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>filepath</emphasis> (str) — путь для сохранения PDF</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>bool — True если экспорт выполнен успешно</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если путь не заканчивается на '.pdf'</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- StatisticsModule -->
+    <section id="api-stats">
+      <title>Модуль StatisticsModule (other_modules.py)</title>
+      <para>Предоставляет инструменты статистического анализа данных.</para>
+
+      <section id="api-stats-desc">
+        <title>Метод get_descriptive_stats()</title>
+        <para>Вычисляет описательную статистику по загруженным данным.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Возвращает</term>
+            <listitem>
+              <para>dict — словарь со значениями: min, max, mean, median, count</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если набор данных пуст</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+    <!-- Collaboration -->
+    <section id="api-collab">
+      <title>Модуль Collaboration (other_modules.py)</title>
+      <para>Обеспечивает совместную работу пользователей над документом.</para>
+
+      <section id="api-collab-user">
+        <title>Метод add_user(username, role)</title>
+        <para>Добавляет пользователя с указанной ролью доступа.</para>
+        <variablelist>
+          <varlistentry>
+            <term>Параметры</term>
+            <listitem>
+              <para><emphasis>username</emphasis> (str) — имя пользователя</para>
+              <para><emphasis>role</emphasis> (str) — роль: 'viewer' или 'editor'</para>
+            </listitem>
+          </varlistentry>
+          <varlistentry>
+            <term>Исключения</term>
+            <listitem>
+              <para>ValueError — если указана неизвестная роль</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </section>
+    </section>
+
+  </chapter>
+
+</book>
