@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExcelPro — Табличный процессор</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700;900&family=Source+Code+Pro:wght@400;600&display=swap');
+
+    :root {
+      --dark:     #0e1f2b;
+      --dark2:    #132838;
+      --teal:     #006d77;
+      --teal2:    #00949f;
+      --tealLight:#83c5be;
+      --cream:    #ffddd2;
+      --cream2:   #ffb4a2;
+      --bg:       #edf6f9;
+      --white:    #ffffff;
+      --gray:     #4a6572;
+      --text:     #1b3040;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(14, 31, 43, 0.95);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 60px;
+      border-bottom: 1px solid rgba(0,149,159,0.25);
+    }
+    .nav-logo {
+      font-size: 20px; font-weight: 900;
+      color: var(--white); letter-spacing: 1px;
+    }
+    .nav-logo span { color: var(--tealLight); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      color: rgba(255,255,255,0.65); text-decoration: none;
+      font-size: 13px; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--tealLight); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      background: var(--dark);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 120px 80px 80px;
+      position: relative; overflow: hidden;
+    }
+    /* background grid pattern */
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,149,159,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,149,159,0.06) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    /* accent circle */
+    #hero::after {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,109,119,0.18) 0%, transparent 70%);
+      right: -100px; top: 50%; transform: translateY(-50%);
+    }
+    .hero-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 4px;
+      text-transform: uppercase; color: var(--teal2);
+      margin-bottom: 20px;
+      position: relative; z-index: 1;
+    }
+    .hero-title {
+      font-size: clamp(44px, 7vw, 88px);
+      font-weight: 900; line-height: 1.0;
+      color: var(--white);
+      position: relative; z-index: 1;
+      max-width: 700px;
+    }
+    .hero-title .accent { color: var(--tealLight); }
+    .hero-sub {
+      margin-top: 24px; max-width: 520px;
+      font-size: 17px; font-weight: 300; line-height: 1.7;
+      color: rgba(255,255,255,0.55);
+      position: relative; z-index: 1;
+    }
+    .hero-badges {
+      display: flex; gap: 12px; margin-top: 36px; flex-wrap: wrap;
+      position: relative; z-index: 1;
+    }
+    .badge {
+      padding: 8px 18px;
+      border: 1px solid rgba(131,197,190,0.35);
+      border-radius: 2px;
+      font-size: 12px; font-weight: 600; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--tealLight);
+      background: rgba(0,109,119,0.12);
+    }
+    .hero-cta {
+      margin-top: 48px;
+      display: flex; gap: 16px; flex-wrap: wrap;
+      position: relative; z-index: 1;
+    }
+    .btn-primary {
+      padding: 14px 32px;
+      background: var(--teal); color: var(--white);
+      text-decoration: none; font-weight: 700; font-size: 14px;
+      letter-spacing: 1px; text-transform: uppercase;
+      border-radius: 2px; transition: background .2s, transform .15s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--teal2); transform: translateY(-2px); }
+    .btn-outline {
+      padding: 14px 32px;
+      border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.7);
+      text-decoration: none; font-weight: 600; font-size: 14px;
+      letter-spacing: 1px; text-transform: uppercase;
+      border-radius: 2px; transition: border-color .2s, color .2s, transform .15s;
+      display: inline-block;
+    }
+    .btn-outline:hover {
+      border-color: var(--tealLight); color: var(--tealLight);
+      transform: translateY(-2px);
+    }
+
+    /* ── SECTIONS common ── */
+    section { padding: 96px 80px; }
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 4px;
+      text-transform: uppercase; color: var(--teal2);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 900; line-height: 1.1;
+      color: var(--dark); margin-bottom: 48px;
+    }
+    .section-title.light { color: var(--white); }
+
+    /* ── ABOUT ── */
+    #about { background: var(--white); }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
+      align-items: start;
+    }
+    .about-text p {
+      font-size: 16px; line-height: 1.8; color: var(--gray);
+      margin-bottom: 20px;
+    }
+    .about-text p:last-child { margin-bottom: 0; }
+    .stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    }
+    .stat-card {
+      background: var(--bg);
+      padding: 28px 24px;
+      border-left: 3px solid var(--teal);
+    }
+    .stat-number {
+      font-size: 44px; font-weight: 900;
+      color: var(--teal); line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      font-size: 13px; font-weight: 600;
+      color: var(--gray); letter-spacing: 0.5px;
+    }
+
+    /* ── MODULES ── */
+    #modules { background: var(--dark2); }
+    #modules .section-title { color: var(--white); }
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 2px;
+    }
+    .module-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(131,197,190,0.1);
+      padding: 28px 24px;
+      transition: background .2s, border-color .2s, transform .2s;
+      cursor: default;
+    }
+    .module-card:hover {
+      background: rgba(0,109,119,0.15);
+      border-color: rgba(131,197,190,0.35);
+      transform: translateY(-3px);
+    }
+    .module-number {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 11px; font-weight: 600;
+      color: var(--teal2); margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+    .module-name {
+      font-size: 15px; font-weight: 700;
+      color: var(--white); margin-bottom: 8px;
+    }
+    .module-desc {
+      font-size: 13px; font-weight: 300;
+      color: rgba(255,255,255,0.4); line-height: 1.6;
+    }
+
+    /* ── ROLES ── */
+    #roles { background: var(--bg); }
+    .roles-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    }
+    .role-card {
+      padding: 40px 36px; border-radius: 2px;
+    }
+    .role-card.user {
+      background: var(--teal);
+    }
+    .role-card.admin {
+      background: var(--white);
+      border: 1px solid rgba(0,109,119,0.15);
+      box-shadow: 0 8px 32px rgba(0,109,119,0.08);
+    }
+    .role-title {
+      font-size: 22px; font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .role-card.user .role-title { color: var(--white); }
+    .role-card.admin .role-title { color: var(--dark); }
+    .role-subtitle {
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      font-weight: 600; margin-bottom: 28px;
+    }
+    .role-card.user .role-subtitle { color: rgba(255,255,255,0.6); }
+    .role-card.admin .role-subtitle { color: var(--teal2); }
+    .role-list { list-style: none; }
+    .role-list li {
+      padding: 9px 0;
+      font-size: 14px; font-weight: 400;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .role-card.user .role-list li { color: rgba(255,255,255,0.85); border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .role-card.admin .role-list li { color: var(--gray); border-bottom: 1px solid rgba(0,109,119,0.1); }
+    .role-list li:last-child { border-bottom: none; }
+    .role-list li::before {
+      content: '—'; font-weight: 700; flex-shrink: 0;
+    }
+    .role-card.user .role-list li::before { color: var(--cream); }
+    .role-card.admin .role-list li::before { color: var(--teal); }
+
+    /* ── TECH ── */
+    #tech { background: var(--dark); }
+    .tech-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    }
+    .tech-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(131,197,190,0.12);
+      padding: 32px 28px;
+      transition: border-color .2s;
+    }
+    .tech-card:hover { border-color: var(--teal2); }
+    .tech-icon {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 28px; font-weight: 700;
+      color: var(--teal2); margin-bottom: 14px;
+    }
+    .tech-name {
+      font-size: 17px; font-weight: 700;
+      color: var(--white); margin-bottom: 8px;
+    }
+    .tech-desc {
+      font-size: 13px; font-weight: 300;
+      color: rgba(255,255,255,0.4); line-height: 1.6;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #07131b;
+      padding: 48px 80px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 24px;
+      border-top: 1px solid rgba(0,149,159,0.2);
+    }
+    .footer-left .footer-logo {
+      font-size: 22px; font-weight: 900; color: var(--white);
+      margin-bottom: 6px;
+    }
+    .footer-left .footer-logo span { color: var(--tealLight); }
+    .footer-meta {
+      font-size: 13px; color: rgba(255,255,255,0.3); line-height: 1.7;
+    }
+    .footer-right { text-align: right; }
+    .footer-right a {
+      display: inline-block;
+      padding: 10px 24px;
+      border: 1px solid rgba(131,197,190,0.3);
+      color: var(--tealLight); text-decoration: none;
+      font-size: 13px; font-weight: 600; letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: background .2s, border-color .2s;
+      border-radius: 2px;
+    }
+    .footer-right a:hover {
+      background: rgba(0,109,119,0.2);
+      border-color: var(--tealLight);
+    }
+
+    /* ── ANIMATIONS ── */
+    .fade-in {
+      opacity: 0; transform: translateY(24px);
+      animation: fadeIn .7s ease forwards;
+    }
+    .fade-in:nth-child(1) { animation-delay: .1s; }
+    .fade-in:nth-child(2) { animation-delay: .2s; }
+    .fade-in:nth-child(3) { animation-delay: .3s; }
+    .fade-in:nth-child(4) { animation-delay: .4s; }
+    .fade-in:nth-child(5) { animation-delay: .5s; }
+
+    @keyframes fadeIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      section { padding: 64px 24px; }
+      #hero { padding: 100px 24px 64px; }
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      .roles-grid { grid-template-columns: 1fr; }
+      .tech-grid { grid-template-columns: 1fr 1fr; }
+      footer { padding: 40px 24px; flex-direction: column; align-items: flex-start; }
+      .footer-right { text-align: left; }
+    }
+    @media (max-width: 600px) {
+      .tech-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Excel<span>Pro</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">О проекте</a></li>
+    <li><a href="#modules">Модули</a></li>
+    <li><a href="#roles">Роли</a></li>
+    <li><a href="#tech">Технологии</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <p class="hero-label fade-in">Учебный проект · Вариант 7 · ПИ-22б</p>
+  <h1 class="hero-title fade-in">
+    Excel<span class="accent">Pro</span><br>Табличный<br>процессор
+  </h1>
+  <p class="hero-sub fade-in">
+    Аналог Microsoft Excel — полнофункциональное приложение для работы с электронными таблицами, формулами, диаграммами и анализом данных.
+  </p>
+  <div class="hero-badges fade-in">
+    <span class="badge">Python 3.8+</span>
+    <span class="badge">14 модулей</span>
+    <span class="badge">Git</span>
+    <span class="badge">Open Source</span>
+  </div>
+  <div class="hero-cta fade-in">
+    <a href="#modules" class="btn-primary">Изучить модули</a>
+    <a href="#about" class="btn-outline">О проекте</a>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <p class="section-label">О проекте</p>
+  <div class="about-grid">
+    <div class="about-text">
+      <h2 class="section-title">Что такое ExcelPro?</h2>
+      <p>ExcelPro — это консольное приложение на языке Python, предназначенное для работы с электронными таблицами. Система предоставляет пользователю полноценный инструментарий для ввода, хранения, обработки и визуализации числовых и текстовых данных.</p>
+      <p>Архитектура приложения построена по принципу единственной ответственности: каждый из 14 модулей выполняет строго определённую задачу и взаимодействует с другими через чётко определённые интерфейсы.</p>
+      <p>Проект реализован в рамках учебного курса «Профессиональная практика программной инженерии» студенткой группы ПИ-22б Кущенко Захар Сергеевич.</p>
+    </div>
+    <div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">14</div>
+          <div class="stat-label">Программных модулей</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">2</div>
+          <div class="stat-label">Роли пользователей</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">4</div>
+          <div class="stat-label">Ветки репозитория</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">MIT</div>
+          <div class="stat-label">Лицензия проекта</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section id="modules">
+  <p class="section-label">Архитектура</p>
+  <h2 class="section-title light">14 модулей системы</h2>
+  <div class="modules-grid">
+    <div class="module-card">
+      <div class="module-number">MOD // 01</div>
+      <div class="module-name">Пользовательский интерфейс</div>
+      <div class="module-desc">Рабочая область, ribbon-панель, строка формул, масштабирование и темы оформления.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 02</div>
+      <div class="module-name">Управление файлами</div>
+      <div class="module-desc">Создание, открытие и сохранение документов. Поддержка форматов xlsx, csv, ods, pdf.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 03</div>
+      <div class="module-name">Ячейки и диапазоны</div>
+      <div class="module-desc">Ввод, редактирование, копирование, объединение ячеек и работа с диапазонами.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 04</div>
+      <div class="module-name">Формулы и вычисления</div>
+      <div class="module-desc">Разбор и вычисление формул. Функции SUM, AVERAGE, IF, VLOOKUP и автоматический пересчёт.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 05</div>
+      <div class="module-name">Форматирование данных</div>
+      <div class="module-desc">Шрифты, цвета, границы, числовые форматы и условное форматирование ячеек.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 06</div>
+      <div class="module-name">Диаграммы и графики</div>
+      <div class="module-desc">Построение гистограмм, линейных, круговых и точечных диаграмм на основе данных.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 07</div>
+      <div class="module-name">Сортировка и фильтрация</div>
+      <div class="module-desc">Упорядочивание данных по столбцам и отбор строк по заданным условиям.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 08</div>
+      <div class="module-name">Управление листами</div>
+      <div class="module-desc">Создание, переименование, копирование листов и межлистовые ссылки в формулах.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 09</div>
+      <div class="module-name">Сводные таблицы</div>
+      <div class="module-desc">Группировка и агрегация данных с динамическим управлением полями и функциями.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 10</div>
+      <div class="module-name">Проверка данных</div>
+      <div class="module-desc">Правила ввода: диапазоны чисел, списки значений, форматы дат и подсказки.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 11</div>
+      <div class="module-name">Макросы и автоматизация</div>
+      <div class="module-desc">Запись и воспроизведение действий пользователя, назначение горячих клавиш.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 12</div>
+      <div class="module-name">Совместная работа</div>
+      <div class="module-desc">Многопользовательское редактирование, комментарии и история изменений документа.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 13</div>
+      <div class="module-name">Печать и экспорт</div>
+      <div class="module-desc">Настройки страницы, предварительный просмотр и экспорт в PDF.</div>
+    </div>
+    <div class="module-card">
+      <div class="module-number">MOD // 14</div>
+      <div class="module-name">Статистика и анализ</div>
+      <div class="module-desc">Описательная статистика, регрессия и анализ «что если» с визуализацией результатов.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<section id="roles">
+  <p class="section-label">Пользователи системы</p>
+  <h2 class="section-title">Роли и возможности</h2>
+  <div class="roles-grid">
+    <div class="role-card user">
+      <div class="role-title">Пользователь</div>
+      <div class="role-subtitle">Базовые права доступа</div>
+      <ul class="role-list">
+        <li>Создание и редактирование таблиц</li>
+        <li>Ввод формул и стандартных функций</li>
+        <li>Форматирование ячеек и диапазонов</li>
+        <li>Построение диаграмм по данным</li>
+        <li>Сортировка и фильтрация строк</li>
+        <li>Работа со сводными таблицами</li>
+        <li>Запись и запуск макросов</li>
+        <li>Экспорт файлов в PDF и CSV</li>
+      </ul>
+    </div>
+    <div class="role-card admin">
+      <div class="role-title">Администратор</div>
+      <div class="role-subtitle">Расширенные права доступа</div>
+      <ul class="role-list">
+        <li>Управление пользователями и правами</li>
+        <li>Настройка параметров совместной работы</li>
+        <li>Просмотр истории изменений документов</li>
+        <li>Настройка правил проверки данных</li>
+        <li>Управление шаблонами документов</li>
+        <li>Контроль автосохранения и резервных копий</li>
+        <li>Настройка параметров печати и экспорта</li>
+        <li>Управление библиотекой макросов</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section id="tech">
+  <p class="section-label">Стек технологий</p>
+  <h2 class="section-title light">Инструменты разработки</h2>
+  <div class="tech-grid">
+    <div class="tech-card">
+      <div class="tech-icon">PY</div>
+      <div class="tech-name">Python 3.8+</div>
+      <div class="tech-desc">Основной язык разработки. Консольное приложение с модульной архитектурой и минимальными зависимостями.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">GIT</div>
+      <div class="tech-name">Git / GitHub</div>
+      <div class="tech-desc">Система контроля версий. Ветки по модулям, pull request'ы, история коммитов и GitHub Pages.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">DOC</div>
+      <div class="tech-name">DocBook XML</div>
+      <div class="tech-desc">Формат технической документации. Справочное руководство программиста с API Reference всех модулей.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">HTML</div>
+      <div class="tech-name">HTML / CSS</div>
+      <div class="tech-desc">Веб-сайт проекта на GitHub Pages. Адаптивная вёрстка без внешних фреймворков.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">PPT</div>
+      <div class="tech-name">PptxGenJS</div>
+      <div class="tech-desc">Генерация презентации руководства пользователя с описанием всех 14 модулей и ролей.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">MIT</div>
+      <div class="tech-name">Лицензия MIT</div>
+      <div class="tech-desc">Открытый исходный код. Свободное использование и модификация в учебных и коммерческих целях.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <div class="footer-logo">Excel<span>Pro</span></div>
+    <div class="footer-meta">
+      Кущенко Захар Сергеевич · ПИ-22б · Вариант 7<br>
+      Профессиональная практика программной инженерии · 2026
+    </div>
+  </div>
+  <div class="footer-right">
+    <a href="https://github.com/zakizane37/excel-spreadsheet-app">Репозиторий на GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>
